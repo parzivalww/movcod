@@ -110,6 +110,8 @@ async function fetchProductMeta(url) {
 }
 
 /* ===== GERAÇÃO DE CONTEÚDO ===== */
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
 function generateContent() {
   const title = document.getElementById('prod-title').value.trim();
   const price = document.getElementById('prod-price').value.trim();
@@ -119,26 +121,61 @@ function generateContent() {
 
   if (!title && !price) return;
 
-  const priceStr = price ? `💰 Por apenas R$ ${price}` : '';
-  const titleLine = title || 'Oferta Imperdível';
-  const descLine = description ? `\n\n${description}` : '';
+  const t = title || 'Oferta Imperdível';
+  const p = price ? `R$ ${price}` : null;
+  const desc = description || '';
 
-  // WhatsApp
-  const whatsapp = `🔥 *${titleLine}*${descLine}\n\n${priceStr}\n\n🛒 Compre agora: ${affiliateUrl}\n\n⏳ Oferta por tempo limitado!`;
+  // ── WhatsApp ──────────────────────────────────────────────
+  const whatsappTemplates = [
+    // Urgência
+    () => `🚨 *ACHEI E PRECISEI COMPARTILHAR!*\n\n👉 *${t}*${desc ? `\n\n💬 ${desc}` : ''}\n\n${p ? `💸 Por apenas *${p}* — tá imperdível!\n\n` : ''}🛒 Pega o seu antes que acabe:\n${affiliateUrl}\n\n⚠️ Não sei até quando fica assim...`,
 
-  // Telegram
-  const telegram = `🎯 **${titleLine}**${descLine}\n\n${priceStr}\n\n➡️ ${affiliateUrl}`;
+    // Descoberta
+    () => `😱 *Não acreditei no preço quando vi...*\n\n${t}${desc ? `\n\n✨ ${desc}` : ''}\n\n${p ? `🏷️ Tá saindo por *${p}*!\n\n` : ''}🔗 Link aqui embaixo 👇\n${affiliateUrl}\n\n💬 Manda pra quem precisa!`,
 
-  // Story / legenda
-  const story = `🔥 ${titleLine}${price ? ` por R$ ${price}` : ''}\n${descLine ? descLine + '\n' : ''}\n👆 Link na bio!\n\n#oferta #promoção #${platform.toLowerCase()} #desconto #compraonline`;
+    // Casual/amigo
+    () => `Ei, olha o que eu achei 👀\n\n*${t}*${desc ? `\n${desc}` : ''}\n\n${p ? `➡️ Por *${p}* — comprei na hora!\n\n` : ''}${affiliateUrl}\n\n🔥 Tô mandando pra todo mundo porque vale muito a pena`,
 
-  // Título para anúncio
-  const adTitle = title ? title.substring(0, 70) + (title.length > 70 ? '...' : '') : 'Oferta Especial';
+    // Direto ao ponto
+    () => `🔥 *OFERTA DO DIA*\n\n📦 ${t}${desc ? `\n📝 ${desc}` : ''}\n\n${p ? `💰 Preço: *${p}*\n` : ''}🛒 ${affiliateUrl}\n\n⏳ Aproveita enquanto tem estoque!`,
 
-  setResult('result-whatsapp', whatsapp);
-  setResult('result-telegram', telegram);
-  setResult('result-story', story);
-  setResult('result-adtitle', adTitle);
+    // Comparativo
+    () => `💡 *Dica de hoje:*\n\n${t}${desc ? `\n\n"${desc}"` : ''}\n\n${p ? `Tá por *${p}* — vi mais caro em outros lugares 😅\n\n` : ''}👉 ${affiliateUrl}\n\n📲 Salva esse contato pra mais dicas assim!`,
+  ];
+
+  // ── Story / Instagram ─────────────────────────────────────
+  const platformTag = platform.toLowerCase().replace(/ /g, '');
+  const storyTemplates = [
+    () => `🔥 OLHA ESSA OFERTA\n\n${t}${p ? `\n\npor apenas ${p}` : ''}\n\n👆 LINK NA BIO\n\n#oferta #promoção #${platformTag} #desconto #compras`,
+
+    () => `😱 NÃO PASSA SEM VER!\n\n${t}${p ? `\n\n💸 ${p}` : ''}\n\n🔗 Link na bio!\n\n#achados #ofertaboa #${platformTag} #promo #dica`,
+
+    () => `💜 ACHADO DO DIA\n\n${t}${desc ? `\n✨ ${desc}` : ''}${p ? `\n\nPor ${p} 🤩` : ''}\n\n👆 Link na bio pra pegar!\n\n#comprinhas #${platformTag} #oferta #vale #dica`,
+
+    () => `⚡ CORRE!\n\n${t}${p ? `\nPor ${p}` : ''}\n\nLink na bio 👆\n\n#promoção #oferta #${platformTag} #desconto #achado`,
+  ];
+
+  // ── Telegram ──────────────────────────────────────────────
+  const telegramTemplates = [
+    () => `🔥 **${t}**${desc ? `\n\n_${desc}_` : ''}\n\n${p ? `💰 Preço: **${p}**\n\n` : ''}🛒 [Comprar agora](${affiliateUrl})`,
+
+    () => `💡 **Oferta encontrada!**\n\n📦 ${t}${desc ? `\n📝 ${desc}` : ''}${p ? `\n\n🏷️ **${p}**` : ''}\n\n👉 [Ver produto](${affiliateUrl})`,
+
+    () => `⚡ **Não perca essa!**\n\n${t}${p ? `\n\nPor apenas **${p}**` : ''}\n\n${desc ? `> ${desc}\n\n` : ''}[🛒 Pegar oferta](${affiliateUrl})`,
+  ];
+
+  // ── Título de anúncio ─────────────────────────────────────
+  const adTitleTemplates = [
+    () => p ? `${t} por ${p} — Oferta por tempo limitado!` : `${t} — Aproveite a oferta!`,
+    () => p ? `🔥 Só hoje: ${t} por ${p}` : `🔥 Oferta: ${t}`,
+    () => p ? `${t} | ${p} na ${platform}` : `${t} em oferta na ${platform}`,
+    () => `⚡ Preço baixou! ${t}${p ? ` — ${p}` : ''}`,
+  ];
+
+  setResult('result-whatsapp', pick(whatsappTemplates)());
+  setResult('result-story', pick(storyTemplates)());
+  setResult('result-telegram', pick(telegramTemplates)());
+  setResult('result-adtitle', pick(adTitleTemplates)().substring(0, 100));
 
   document.getElementById('results-content').style.display = 'block';
 }
