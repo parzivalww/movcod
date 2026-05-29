@@ -70,6 +70,43 @@ function handleConvert() {
   // Mostra formulário de produto
   document.getElementById('product-form-section').classList.add('visible');
   generateContent();
+
+  // Busca metadados automaticamente
+  fetchProductMeta(url);
+}
+
+/* ===== BUSCA AUTOMÁTICA DE METADADOS ===== */
+async function fetchProductMeta(url) {
+  const btn = document.getElementById('btn-converter');
+  const loadingEl = document.getElementById('meta-loading');
+  if (loadingEl) loadingEl.style.display = 'flex';
+  if (btn) btn.disabled = true;
+
+  try {
+    const res = await fetch('api/fetch-meta.php?url=' + encodeURIComponent(url));
+    if (!res.ok) throw new Error('Falha na requisição');
+    const data = await res.json();
+
+    if (data.title && !document.getElementById('prod-title').value) {
+      document.getElementById('prod-title').value = data.title;
+    }
+    if (data.image && !document.getElementById('prod-image').value) {
+      document.getElementById('prod-image').value = data.image;
+    }
+    if (data.price && !document.getElementById('prod-price').value) {
+      document.getElementById('prod-price').value = data.price;
+    }
+    if (data.description && !document.getElementById('prod-desc').value) {
+      document.getElementById('prod-desc').value = data.description;
+    }
+
+    generateContent();
+  } catch {
+    // API não disponível — usuário preenche manualmente
+  } finally {
+    if (loadingEl) loadingEl.style.display = 'none';
+    if (btn) btn.disabled = false;
+  }
 }
 
 /* ===== GERAÇÃO DE CONTEÚDO ===== */

@@ -43,9 +43,14 @@
         <p>Cole o link do produto e receba o link de afiliado + textos prontos para WhatsApp e stories.</p>
         <div class="link-input-wrap">
           <input type="url" id="link-input" placeholder="https://www.amazon.com.br/dp/..." autocomplete="off">
-          <button class="btn btn-primary btn-lg" onclick="handleConvert()">Converter ⚡</button>
+          <button class="btn btn-primary btn-lg" id="btn-converter" onclick="handleConvert()">Converter ⚡</button>
         </div>
         <div id="no-tag-warning" style="display:none;margin-top:12px;font-size:.82rem;background:rgba(0,0,0,.2);padding:8px 12px;border-radius:8px;color:rgba(255,255,255,.9)"></div>
+        <div id="meta-loading" style="display:none;align-items:center;gap:8px;margin-top:12px;font-size:.82rem;color:rgba(255,255,255,.85)">
+          <div style="width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite"></div>
+          Buscando informações do produto...
+        </div>
+        <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
       </div>
 
       <!-- Plataforma detectada + link afiliado -->
