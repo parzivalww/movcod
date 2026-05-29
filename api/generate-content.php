@@ -58,7 +58,7 @@ $body = json_encode([
 
 $ch = curl_init();
 curl_setopt_array($ch, [
-    CURLOPT_URL            => "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$apiKey}",
+    CURLOPT_URL            => "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={$apiKey}",
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_POST           => true,
     CURLOPT_POSTFIELDS     => $body,
