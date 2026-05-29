@@ -1,0 +1,4 @@
+setup\
+.git\
+sf.zip
+sf_current\
