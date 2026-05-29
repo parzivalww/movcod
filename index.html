@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Divulga Pro — Gerenciador de Afiliados</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" role="navigation">
+    <div class="navbar-brand">
+      <span>⚡</span> Divulga Pro
+    </div>
+    <ul class="navbar-nav">
+      <li><button class="nav-link active" data-page="converter">🔗 Converter</button></li>
+      <li><button class="nav-link" data-page="produtos">📦 Produtos</button></li>
+      <li><button class="nav-link" data-page="catalogo">🏪 Catálogo</button></li>
+      <li><button class="nav-link" data-page="config">⚙️ Config</button></li>
+    </ul>
+  </nav>
+
+  <!-- MOBILE NAV -->
+  <nav class="mobile-nav">
+    <a data-page="converter" class="active"><span>🔗</span><span>Converter</span></a>
+    <a data-page="produtos"><span>📦</span><span>Produtos</span></a>
+    <a data-page="catalogo"><span>🏪</span><span>Catálogo</span></a>
+    <a data-page="config"><span>⚙️</span><span>Config</span></a>
+  </nav>
+
+  <main class="container">
+
+    <!-- ===== PAGE: CONVERTER ===== -->
+    <div id="page-converter" class="page active">
+
+      <!-- Hero converter -->
+      <div class="converter-hero">
+        <h2>🚀 Converter Link de Afiliado</h2>
+        <p>Cole o link do produto e receba o link de afiliado + textos prontos para WhatsApp e stories.</p>
+        <div class="link-input-wrap">
+          <input type="url" id="link-input" placeholder="https://www.amazon.com.br/dp/..." autocomplete="off">
+          <button class="btn btn-primary btn-lg" onclick="handleConvert()">Converter ⚡</button>
+        </div>
+        <div id="no-tag-warning" style="display:none;margin-top:12px;font-size:.82rem;background:rgba(0,0,0,.2);padding:8px 12px;border-radius:8px;color:rgba(255,255,255,.9)"></div>
+      </div>
+
+      <!-- Plataforma detectada + link afiliado -->
+      <div id="result-affiliate" class="result-box">
+        <div class="result-header">
+          <div class="result-title">🎯 Plataforma Detectada</div>
+          <div id="detected-platform"></div>
+        </div>
+        <div class="result-header" style="margin-top:12px">
+          <div class="result-title">🔗 Link de Afiliado</div>
+          <button class="btn btn-secondary btn-sm" onclick="copyText(document.getElementById('affiliate-link-text').textContent)">📋 Copiar</button>
+        </div>
+        <div class="result-content" id="affiliate-link-text"></div>
+      </div>
+
+      <!-- Informações do produto -->
+      <div id="product-form-section">
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header">📝 Informações do Produto</div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Título do produto</label>
+              <input type="text" id="prod-title" placeholder="Ex: Fone Bluetooth JBL Tune 510BT">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Preço (R$)</label>
+                <input type="text" id="prod-price" placeholder="Ex: 149,90">
+              </div>
+              <div class="form-group">
+                <label>URL da Imagem</label>
+                <input type="url" id="prod-image" placeholder="https://...">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Descrição / Destaque</label>
+              <textarea id="prod-desc" placeholder="Ex: Cancelamento de ruído, 40h de bateria, dobráveis..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conteúdos gerados -->
+        <div id="results-content" style="display:none">
+
+          <!-- WhatsApp -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              📱 Texto para WhatsApp / Telegram
+              <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="copyText(document.getElementById('result-whatsapp').textContent)">📋 Copiar</button>
+            </div>
+            <div class="card-body">
+              <div class="result-content promo-text" id="result-whatsapp"></div>
+            </div>
+          </div>
+
+          <!-- Story -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              📸 Legenda para Story / Post
+              <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="copyText(document.getElementById('result-story').textContent)">📋 Copiar</button>
+            </div>
+            <div class="card-body">
+              <div class="result-content promo-text" id="result-story"></div>
+            </div>
+          </div>
+
+          <!-- Título para anúncio -->
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              📢 Título para Anúncio
+              <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="copyText(document.getElementById('result-adtitle').textContent)">📋 Copiar</button>
+            </div>
+            <div class="card-body">
+              <div class="result-content" id="result-adtitle"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <button class="btn btn-success btn-lg" onclick="saveProduct()">💾 Salvar no Catálogo</button>
+            <button class="btn btn-outline" onclick="resetConverterForm()">✖ Limpar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dica inicial quando não converteu nada -->
+      <div id="convert-hint" style="margin-top:8px">
+        <div class="alert alert-info">
+          <span>💡</span>
+          <div>
+            <strong>Como usar:</strong> Cole o link de qualquer produto da Amazon, Shopee ou Mercado Livre acima.
+            O sistema detecta a plataforma, aplica seu ID de afiliado e gera os textos prontos para divulgar.
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-products">0</div>
+            <div class="stat-label">Produtos salvos</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Plataformas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-top-platform">—</div>
+            <div class="stat-label">Plataforma top</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== PAGE: PRODUTOS ===== -->
+    <div id="page-produtos" class="page">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="font-family:'Poppins',sans-serif;font-size:1.3rem">📦 Meus Produtos</h2>
+          <p style="color:var(--muted);font-size:.875rem;margin-top:2px"><span id="product-count">0</span> produto(s) salvo(s)</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="exportProducts()">⬇️ Exportar</button>
+          <label class="btn btn-outline btn-sm" style="cursor:pointer">
+            ⬆️ Importar
+            <input type="file" accept=".json" style="display:none" onchange="importProducts(this)">
+          </label>
+          <button class="btn btn-primary btn-sm" onclick="showPage('converter')">+ Adicionar</button>
+        </div>
+      </div>
+
+      <div class="products-grid" id="products-grid"></div>
+    </div>
+
+    <!-- ===== PAGE: CATÁLOGO ===== -->
+    <div id="page-catalogo" class="page">
+      <h2 style="font-family:'Poppins',sans-serif;font-size:1.3rem;margin-bottom:16px">🏪 Meu Catálogo</h2>
+
+      <div class="share-box">
+        <h3>🔗 Compartilhe seu catálogo</h3>
+        <p>Envie este link para seus seguidores verem todas as suas promoções</p>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <code id="catalog-url" style="background:#EDE9FE;color:#4C1D95;padding:8px 14px;border-radius:8px;font-size:.82rem;word-break:break-all"></code>
+          <button class="btn btn-primary btn-sm" onclick="copyText(document.getElementById('catalog-url').textContent)">📋 Copiar</button>
+          <a id="catalog-open-btn" href="catalogo.html" target="_blank" class="btn btn-outline btn-sm">🔗 Abrir</a>
+        </div>
+      </div>
+
+      <div id="catalog-preview"></div>
+    </div>
+
+    <!-- ===== PAGE: CONFIGURAÇÕES ===== -->
+    <div id="page-config" class="page">
+      <h2 style="font-family:'Poppins',sans-serif;font-size:1.3rem;margin-bottom:20px">⚙️ Configurações</h2>
+
+      <!-- Afiliados -->
+      <div class="settings-section">
+        <h3>IDs de Afiliado</h3>
+
+        <div class="platform-config">
+          <div class="platform-icon">🛒</div>
+          <div class="platform-info">
+            <label>Amazon Associates — Tag ID</label>
+            <input type="text" id="cfg-amazon-tag" placeholder="Ex: seunome-20">
+            <p class="help-text">
+              Encontre em <strong>affiliate-program.amazon.com.br</strong> → Ferramentas → Tag de rastreamento.<br>
+              O sistema adiciona automaticamente <code>?tag=SUA_TAG</code> em todos os links Amazon.
+            </p>
+          </div>
+        </div>
+
+        <div class="platform-config">
+          <div class="platform-icon">🟠</div>
+          <div class="platform-info">
+            <label>Shopee Affiliates — Link de afiliado gerado</label>
+            <input type="url" id="cfg-shopee-link" placeholder="Ex: https://s.shopee.com.br/XXXXX">
+            <p class="help-text">
+              Gere seu link no painel da Shopee em <strong>affiliate.shopee.com.br</strong> e cole aqui.
+              Quando você converter um link Shopee, este será o link de afiliado usado.
+            </p>
+          </div>
+        </div>
+
+        <div class="platform-config">
+          <div class="platform-icon">🛍️</div>
+          <div class="platform-info">
+            <label>Mercado Livre — Link de afiliado</label>
+            <input type="url" id="cfg-ml-link" placeholder="Ex: https://click.mercadolivre.com.br/...">
+            <p class="help-text">
+              Acesse o programa de afiliados do Mercado Livre e gere seu link de rastreamento.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loja -->
+      <div class="settings-section">
+        <h3>Informações da Loja</h3>
+        <div class="form-group">
+          <label>Nome da loja / canal</label>
+          <input type="text" id="cfg-store-name" placeholder="Ex: Ofertas do João">
+        </div>
+        <div class="form-group">
+          <label>Descrição</label>
+          <textarea id="cfg-store-desc" placeholder="Ex: As melhores promoções do dia para você!"></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-lg" onclick="saveSettings()">💾 Salvar Configurações</button>
+
+      <!-- Backup -->
+      <div class="settings-section" style="margin-top:28px">
+        <h3>Backup & Dados</h3>
+        <div class="alert alert-info">
+          <span>ℹ️</span>
+          <div>Seus dados ficam salvos no navegador. Use a exportação para fazer backup ou migrar para outro dispositivo.</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="exportProducts()">⬇️ Exportar Backup</button>
+          <label class="btn btn-outline" style="cursor:pointer">
+            ⬆️ Importar Backup
+            <input type="file" accept=".json" style="display:none" onchange="importProducts(this)">
+          </label>
+          <button class="btn btn-danger" onclick="if(confirm('Apagar TODOS os produtos?')){state.products=[];saveToStorage();showFeedback('🗑️ Dados apagados.');}">🗑️ Limpar Dados</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast feedback -->
+  <div id="copy-feedback" class="copy-feedback"></div>
+
+  <script src="js/affiliate.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
