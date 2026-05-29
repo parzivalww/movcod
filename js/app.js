@@ -5,6 +5,7 @@ let state = {
     amazonTag: '',
     shopeeAffiliateLink: '',
     mlAffiliateLink: '',
+    geminiKey: '',
     storeName: 'Minhas Promoções',
     storeDesc: 'As melhores ofertas selecionadas para você!',
     storeSlug: 'promocoes',
@@ -185,6 +186,69 @@ function setResult(id, text) {
   if (el) el.textContent = text;
 }
 
+/* ===== GERAÇÃO COM IA (GEMINI) ===== */
+async function generateWithAI() {
+  const apiKey = state.settings.geminiKey;
+  if (!apiKey) {
+    alert('Configure sua chave da API Gemini em ⚙️ Configurações primeiro.\n\nPegue grátis em aistudio.google.com → "Get API Key"');
+    showPage('config');
+    return;
+  }
+
+  const title = document.getElementById('prod-title').value.trim();
+  if (!title) {
+    alert('Preencha o título do produto antes de gerar com IA.');
+    return;
+  }
+
+  const loading = document.getElementById('ia-loading');
+  const btn = document.getElementById('btn-ia');
+  loading.style.display = 'flex';
+  btn.disabled = true;
+  btn.textContent = '⏳ Gerando...';
+
+  try {
+    const res = await fetch('api/generate-content.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        price: document.getElementById('prod-price').value.trim(),
+        description: document.getElementById('prod-desc').value.trim(),
+        platform: state.currentPlatform?.name || 'loja',
+        apiKey
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      alert('Erro da IA: ' + data.error);
+      return;
+    }
+
+    const url = state.currentAffiliateUrl;
+
+    if (data.whatsapp) setResult('result-whatsapp', data.whatsapp.replace('[LINK]', url));
+    if (data.story)    setResult('result-story', data.story);
+    if (data.telegram) setResult('result-telegram', data.telegram.replace('[LINK]', url));
+    if (data.titulo)   setResult('result-adtitle', data.titulo);
+
+    if (data.hook) {
+      showFeedback('✨ Hook: ' + data.hook);
+    }
+
+    document.getElementById('results-content').style.display = 'block';
+
+  } catch (e) {
+    alert('Erro ao conectar com a IA. Verifique sua conexão e chave API.');
+  } finally {
+    loading.style.display = 'none';
+    btn.disabled = false;
+    btn.textContent = '✨ Gerar com IA';
+  }
+}
+
 /* ===== SALVAR PRODUTO ===== */
 function saveProduct() {
   const title = document.getElementById('prod-title').value.trim();
@@ -341,6 +405,7 @@ function loadSettingsForm() {
   document.getElementById('cfg-amazon-tag').value = state.settings.amazonTag || '';
   document.getElementById('cfg-shopee-link').value = state.settings.shopeeAffiliateLink || '';
   document.getElementById('cfg-ml-link').value = state.settings.mlAffiliateLink || '';
+  document.getElementById('cfg-gemini-key').value = state.settings.geminiKey || '';
   document.getElementById('cfg-store-name').value = state.settings.storeName || '';
   document.getElementById('cfg-store-desc').value = state.settings.storeDesc || '';
 }
@@ -349,6 +414,7 @@ function saveSettings() {
   state.settings.amazonTag = document.getElementById('cfg-amazon-tag').value.trim();
   state.settings.shopeeAffiliateLink = document.getElementById('cfg-shopee-link').value.trim();
   state.settings.mlAffiliateLink = document.getElementById('cfg-ml-link').value.trim();
+  state.settings.geminiKey = document.getElementById('cfg-gemini-key').value.trim();
   state.settings.storeName = document.getElementById('cfg-store-name').value.trim() || 'Minhas Promoções';
   state.settings.storeDesc = document.getElementById('cfg-store-desc').value.trim();
 

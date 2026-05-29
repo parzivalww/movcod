@@ -128,9 +128,14 @@
             </div>
           </div>
 
-          <div style="display:flex;gap:12px;margin-top:8px">
+          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
             <button class="btn btn-success btn-lg" onclick="saveProduct()">💾 Salvar no Catálogo</button>
+            <button class="btn btn-primary" id="btn-ia" onclick="generateWithAI()">✨ Gerar com IA</button>
             <button class="btn btn-outline" onclick="resetConverterForm()">✖ Limpar</button>
+          </div>
+          <div id="ia-loading" style="display:none;align-items:center;gap:8px;margin-top:12px;font-size:.82rem;color:var(--primary)">
+            <div style="width:14px;height:14px;border:2px solid #DDD6FE;border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite"></div>
+            IA gerando textos criativos...
           </div>
         </div>
       </div>
@@ -228,6 +233,15 @@
               Gere seu link no painel da Shopee em <strong>affiliate.shopee.com.br</strong> e cole aqui.
               Quando você converter um link Shopee, este será o link de afiliado usado.
             </p>
+          </div>
+        </div>
+
+        <div class="platform-config">
+          <div class="platform-icon">🤖</div>
+          <div class="platform-info">
+            <label>Google Gemini — Chave API (para textos com IA)</label>
+            <input type="password" id="cfg-gemini-key" placeholder="AIza...">
+            <p class="help-text">Grátis em <strong>aistudio.google.com</strong> → "Get API Key". Ativa o botão "✨ Gerar com IA".</p>
           </div>
         </div>
 
