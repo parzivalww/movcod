@@ -1,16 +1,10 @@
 Options -Indexes
 DirectoryIndex index.html index.php
 
-# Protege a pasta de dados
+# Protege a pasta de dados (config.json com a chave da IA fica inacessível)
 <FilesMatch "\.json$">
     Order allow,deny
     Deny from all
-</FilesMatch>
-
-# API: permite acesso aos PHP
-<FilesMatch "^(products|settings)\.php$">
-    Order allow,deny
-    Allow from all
 </FilesMatch>
 
 # Compressão

@@ -3,299 +3,545 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Divulga Pro — Gerenciador de Afiliados</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <title>Afilias — Gerador de Ofertas</title>
+  <link rel="preconnect" href="https://api.fontshare.com">
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#f4f6fb;--surface:#fff;--surface2:#f8fafc;--border:#e4e8f0;
+      --text:#111827;--muted:#667085;--primary:#0f5da8;--primary-h:#174ea6;
+      --ok:#1a6b48;--warn:#92600f;--err:#b42318;
+      --radius:20px;--shadow:0 12px 40px rgba(17,24,39,.1)
+    }
+    body{font-family:'Satoshi',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:28px 16px}
+    .wrap{max-width:1100px;margin:0 auto}
+    .topbar{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:28px;gap:16px}
+    h1{font-size:1.65rem;font-weight:900;margin-bottom:4px}
+    .sub{font-size:.95rem;color:var(--muted)}
+    .gear{flex-shrink:0;width:46px;height:46px;border-radius:14px;border:1.5px solid var(--border);background:#fff;font-size:1.3rem;cursor:pointer;transition:background .18s}
+    .gear:hover{background:var(--bg)}
+    .layout{display:grid;grid-template-columns:1fr 440px;gap:24px;align-items:start}
+    .panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;display:grid;gap:20px}
+    .section{display:grid;gap:14px}
+    .section-title{font-size:.82rem;font-weight:900;letter-spacing:.07em;text-transform:uppercase;color:var(--primary);border-bottom:1px solid var(--border);padding-bottom:8px}
+    .field{display:grid;gap:7px}
+    .field label{font-size:.93rem;font-weight:800;color:var(--text)}
+    .field .label-row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    input,textarea,select{width:100%;padding:13px 15px;border-radius:14px;border:1.5px solid var(--border);font:inherit;font-size:.97rem;color:var(--text);background:#fff;outline:none;transition:border-color .18s,box-shadow .18s}
+    input:focus,textarea:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(15,93,168,.12)}
+    textarea{min-height:80px;resize:vertical}
+    .btn{padding:14px 20px;border-radius:14px;border:none;font:inherit;font-weight:900;font-size:.97rem;cursor:pointer;transition:background .18s,opacity .18s;width:100%}
+    .btn-primary{background:var(--primary);color:#fff}
+    .btn-primary:hover{background:var(--primary-h)}
+    .btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-ai{background:linear-gradient(135deg,#6d28d9,#9333ea);color:#fff}
+    .btn-ai:hover{opacity:.9}
+    .btn-mini{padding:7px 12px;border-radius:10px;border:1.5px solid #ddd0f5;background:#f5f0ff;color:#6d28d9;font:inherit;font-weight:800;font-size:.82rem;cursor:pointer;white-space:nowrap;transition:background .18s}
+    .btn-mini:hover{background:#ede4ff}
+    .btn-sm{padding:10px 14px;border-radius:12px;border:1.5px solid var(--border);background:#fff;font:inherit;font-size:.88rem;font-weight:800;cursor:pointer;color:var(--text);width:100%}
+    .btn-sm:hover{background:var(--bg)}
+    .btn-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .status{font-size:.9rem;font-weight:700;min-height:1.1em;text-align:center}
+    .ok{color:var(--ok)}.warn{color:var(--warn)}.err{color:var(--err)}
+    .hint{font-size:.82rem;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+    /* AFFILIATE BOX */
+    .aff-box{display:none;background:#edf7ee;border:1px solid #b7e0bd;border-radius:12px;padding:11px 13px;gap:6px}
+    .aff-box.show{display:grid}
+    .aff-box .aff-label{font-size:.78rem;font-weight:900;color:var(--ok);text-transform:uppercase;letter-spacing:.05em}
+    .aff-box .aff-url{font-size:.83rem;color:var(--text);word-break:break-all}
+    /* FORMAT TOGGLE */
+    .seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:5px}
+    .seg button{padding:9px;border:none;border-radius:10px;background:transparent;font:inherit;font-weight:800;font-size:.9rem;cursor:pointer;color:var(--muted);transition:background .18s,color .18s}
+    .seg button.active{background:#fff;color:var(--primary);box-shadow:0 2px 8px rgba(17,24,39,.08)}
+    /* AI ALTS */
+    .ai-alts{display:none;flex-wrap:wrap;gap:7px}
+    .ai-alts.show{display:flex}
+    .ai-alt{padding:7px 12px;border-radius:999px;border:1.5px solid #ddd0f5;background:#faf7ff;color:#6d28d9;font-size:.84rem;font-weight:700;cursor:pointer;transition:background .18s}
+    .ai-alt:hover{background:#f0e8ff}
+    /* CARD */
+    .preview-panel{position:sticky;top:20px}
+    .card-preview{background:linear-gradient(170deg,#fff 0%,#f5faff 100%);border:1px solid var(--border);border-radius:30px;overflow:hidden;box-shadow:0 18px 50px rgba(17,24,39,.12);width:100%;margin:0 auto;transition:max-width .25s}
+    .card-preview.fmt-square{max-width:100%}
+    .card-preview.fmt-story{max-width:300px}
+    .card-topbar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 0}
+    .brand-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;background:#edf4ff;color:var(--primary);font-size:.82rem;font-weight:900}
+    .dot{width:9px;height:9px;border-radius:999px;background:var(--primary)}
+    .card-img{margin:16px 16px 0;border-radius:22px;background:#eef2f7;overflow:hidden;display:flex;align-items:center;justify-content:center}
+    .fmt-square .card-img{aspect-ratio:1/1}
+    .fmt-story .card-img{aspect-ratio:1/1}
+    .card-img img,.card-img canvas{width:100%;height:100%;display:block;object-fit:cover}
+    .card-img .no-img{color:var(--muted);font-size:.9rem;font-weight:700;padding:40px}
+    .card-body{padding:18px 20px 24px}
+    .card-headline{font-size:1.75rem;font-weight:900;line-height:1;letter-spacing:-.03em;margin-bottom:10px;color:var(--text)}
+    .fmt-story .card-headline{font-size:1.5rem}
+    .card-title{font-size:1.1rem;font-weight:700;line-height:1.25;margin-bottom:12px}
+    .card-off{display:inline-flex;align-items:center;padding:8px 13px;border-radius:999px;background:#fff1f1;color:var(--err);font-weight:900;font-size:.95rem;margin-bottom:12px}
+    .card-prices{display:grid;gap:5px;margin-bottom:10px}
+    .card-old{font-size:1rem;color:var(--muted);text-decoration:line-through;font-weight:700}
+    .card-new{font-size:1.9rem;font-weight:900;line-height:1}
+    .card-save{font-size:.95rem;color:var(--primary);font-weight:900;margin-bottom:14px}
+    .card-cta{font-size:.93rem;font-weight:800;margin-bottom:3px}
+    .card-note{margin-top:12px;font-size:.9rem;color:var(--muted);line-height:1.4}
+    /* MODAL */
+    .modal-bg{display:none;position:fixed;inset:0;background:rgba(17,24,39,.55);z-index:50;align-items:center;justify-content:center;padding:20px}
+    .modal-bg.show{display:flex}
+    .modal{background:#fff;border-radius:22px;max-width:480px;width:100%;max-height:90vh;overflow-y:auto;padding:26px;box-shadow:0 24px 60px rgba(0,0,0,.3)}
+    .modal h2{font-size:1.25rem;font-weight:900;margin-bottom:4px}
+    .modal .msub{font-size:.88rem;color:var(--muted);margin-bottom:20px}
+    .modal .field{margin-bottom:15px}
+    .modal-close{float:right;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--muted);line-height:1}
+    .badge-key{display:inline-block;font-size:.72rem;font-weight:800;padding:2px 8px;border-radius:999px;margin-left:6px}
+    .badge-on{background:#e6f6ec;color:var(--ok)}
+    .badge-off{background:#fdecec;color:var(--err)}
+    @media(max-width:820px){.layout{grid-template-columns:1fr}.preview-panel{position:static}.card-preview.fmt-story{max-width:280px}}
+    @media(max-width:500px){.row3{grid-template-columns:1fr}}
+  </style>
 </head>
 <body>
-
-  <!-- NAVBAR -->
-  <nav class="navbar" role="navigation">
-    <div class="navbar-brand">
-      <span>⚡</span> Divulga Pro
+<div class="wrap">
+  <div class="topbar">
+    <div>
+      <h1>🛍️ <span id="brandName">Afilias</span> — Gerador de Ofertas</h1>
+      <p class="sub">Cole o link, extraia os dados, gere a chamada com IA e exporte o card.</p>
     </div>
-    <ul class="navbar-nav">
-      <li><button class="nav-link active" data-page="converter">🔗 Converter</button></li>
-      <li><button class="nav-link" data-page="produtos">📦 Produtos</button></li>
-      <li><button class="nav-link" data-page="catalogo">🏪 Catálogo</button></li>
-      <li><button class="nav-link" data-page="config">⚙️ Config</button></li>
-    </ul>
-  </nav>
+    <button class="gear" id="openSettings" title="Configurações">⚙️</button>
+  </div>
 
-  <!-- MOBILE NAV -->
-  <nav class="mobile-nav">
-    <a data-page="converter" class="active"><span>🔗</span><span>Converter</span></a>
-    <a data-page="produtos"><span>📦</span><span>Produtos</span></a>
-    <a data-page="catalogo"><span>🏪</span><span>Catálogo</span></a>
-    <a data-page="config"><span>⚙️</span><span>Config</span></a>
-  </nav>
-
-  <main class="container">
-
-    <!-- ===== PAGE: CONVERTER ===== -->
-    <div id="page-converter" class="page active">
-
-      <!-- Hero converter -->
-      <div class="converter-hero">
-        <h2>🚀 Converter Link de Afiliado</h2>
-        <p>Cole o link do produto e receba o link de afiliado + textos prontos para WhatsApp e stories.</p>
-        <div class="link-input-wrap">
-          <input type="url" id="link-input" placeholder="https://www.amazon.com.br/dp/..." autocomplete="off">
-          <button class="btn btn-primary btn-lg" id="btn-converter" onclick="handleConvert()">Converter ⚡</button>
+  <div class="layout">
+    <div class="panel">
+      <!-- 1. LINK -->
+      <div class="section">
+        <div class="section-title">1. Link do produto</div>
+        <div class="field">
+          <label for="linkInput">🔗 URL</label>
+          <input id="linkInput" type="url" placeholder="https://shopee.com.br/...">
         </div>
-        <div id="no-tag-warning" style="display:none;margin-top:12px;font-size:.82rem;background:rgba(0,0,0,.2);padding:8px 12px;border-radius:8px;color:rgba(255,255,255,.9)"></div>
-        <div id="meta-loading" style="display:none;align-items:center;gap:8px;margin-top:12px;font-size:.82rem;color:rgba(255,255,255,.85)">
-          <div style="width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite"></div>
-          Buscando informações do produto...
-        </div>
-        <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
-      </div>
-
-      <!-- Plataforma detectada + link afiliado -->
-      <div id="result-affiliate" class="result-box">
-        <div class="result-header">
-          <div class="result-title">🎯 Plataforma Detectada</div>
-          <div id="detected-platform"></div>
-        </div>
-        <div class="result-header" style="margin-top:12px">
-          <div class="result-title">🔗 Link de Afiliado</div>
-          <button class="btn btn-secondary btn-sm" onclick="copyText(document.getElementById('affiliate-link-text').textContent)">📋 Copiar</button>
-        </div>
-        <div class="result-content" id="affiliate-link-text"></div>
-      </div>
-
-      <!-- Informações do produto -->
-      <div id="product-form-section">
-        <div class="card" style="margin-bottom:20px">
-          <div class="card-header">📝 Informações do Produto</div>
-          <div class="card-body">
-            <div class="form-group">
-              <label>Título do produto</label>
-              <input type="text" id="prod-title" placeholder="Ex: Fone Bluetooth JBL Tune 510BT">
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Preço (R$)</label>
-                <input type="text" id="prod-price" placeholder="Ex: 149,90">
-              </div>
-              <div class="form-group">
-                <label>URL da Imagem</label>
-                <input type="url" id="prod-image" placeholder="https://...">
-              </div>
-            </div>
-            <div class="form-group">
-              <label>Descrição / Destaque</label>
-              <textarea id="prod-desc" placeholder="Ex: Cancelamento de ruído, 40h de bateria, dobráveis..."></textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- Conteúdos gerados -->
-        <div id="results-content" style="display:none">
-
-          <!-- WhatsApp -->
-          <div class="card" style="margin-bottom:16px">
-            <div class="card-header">
-              📱 Texto para WhatsApp / Telegram
-              <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="copyText(document.getElementById('result-whatsapp').textContent)">📋 Copiar</button>
-            </div>
-            <div class="card-body">
-              <div class="result-content promo-text" id="result-whatsapp"></div>
-            </div>
-          </div>
-
-          <!-- Story -->
-          <div class="card" style="margin-bottom:16px">
-            <div class="card-header">
-              📸 Legenda para Story / Post
-              <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="copyText(document.getElementById('result-story').textContent)">📋 Copiar</button>
-            </div>
-            <div class="card-body">
-              <div class="result-content promo-text" id="result-story"></div>
-            </div>
-          </div>
-
-          <!-- Título para anúncio -->
-          <div class="card" style="margin-bottom:16px">
-            <div class="card-header">
-              📢 Título para Anúncio
-              <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="copyText(document.getElementById('result-adtitle').textContent)">📋 Copiar</button>
-            </div>
-            <div class="card-body">
-              <div class="result-content" id="result-adtitle"></div>
-            </div>
-          </div>
-
-          <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
-            <button class="btn btn-success btn-lg" onclick="saveProduct()">💾 Salvar no Catálogo</button>
-            <button class="btn btn-primary" id="btn-ia" onclick="generateWithAI()">✨ Gerar com IA</button>
-            <button class="btn btn-outline" onclick="resetConverterForm()">✖ Limpar</button>
-          </div>
-          <div id="ia-loading" style="display:none;align-items:center;gap:8px;margin-top:12px;font-size:.82rem;color:var(--primary)">
-            <div style="width:14px;height:14px;border:2px solid #DDD6FE;border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite"></div>
-            IA gerando textos criativos...
-          </div>
+        <button id="extractBtn" class="btn btn-primary">⚡ Extrair imagem + nome</button>
+        <div id="status" class="status warn">Cole um link e clique em extrair.</div>
+        <div id="affBox" class="aff-box">
+          <span class="aff-label">🔗 Link de afiliado gerado</span>
+          <span id="affUrl" class="aff-url"></span>
         </div>
       </div>
 
-      <!-- Dica inicial quando não converteu nada -->
-      <div id="convert-hint" style="margin-top:8px">
-        <div class="alert alert-info">
-          <span>💡</span>
-          <div>
-            <strong>Como usar:</strong> Cole o link de qualquer produto da Amazon, Shopee ou Mercado Livre acima.
-            O sistema detecta a plataforma, aplica seu ID de afiliado e gera os textos prontos para divulgar.
+      <!-- 2. DADOS -->
+      <div class="section">
+        <div class="section-title">2. Dados da oferta</div>
+        <div class="field">
+          <label for="fTitle">🏷️ Título do produto</label>
+          <input id="fTitle" type="text" placeholder="Ex: Câmbio G27 para Euro Truck Simulator 2">
+        </div>
+        <div class="field">
+          <div class="label-row">
+            <label for="fHeadline">✨ Chamada</label>
+            <button id="aiBtn" class="btn-mini">🤖 Gerar com IA</button>
+          </div>
+          <input id="fHeadline" type="text" placeholder="Ex: ACHADO DO DIA">
+          <div id="aiAlts" class="ai-alts"></div>
+        </div>
+        <div class="row3">
+          <div class="field">
+            <label for="fOld">💸 Preço antigo</label>
+            <input id="fOld" type="text" placeholder="1.899,90" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label for="fNew">🔥 Preço novo</label>
+            <input id="fNew" type="text" placeholder="1.299,90" inputmode="decimal">
+          </div>
+          <div class="field">
+            <label for="fDisc">🏷️ % OFF</label>
+            <input id="fDisc" type="text" placeholder="Auto" inputmode="decimal">
           </div>
         </div>
+        <div class="hint">Preenchendo preço antigo e novo, o % OFF é calculado automaticamente.</div>
+        <div class="field">
+          <label for="fDesc">📝 Cupom / Descrição curta</label>
+          <textarea id="fDesc" placeholder="Ex: Cupom AFILIAS10 — loja oficial. Frete grátis."></textarea>
+        </div>
+        <div class="field">
+          <label for="fImg">🖼️ URL da imagem</label>
+          <input id="fImg" type="url" placeholder="Preenchido auto ou cole manualmente">
+        </div>
+      </div>
 
-        <div class="stats-row">
-          <div class="stat-card">
-            <div class="stat-value" id="stat-products">0</div>
-            <div class="stat-label">Produtos salvos</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">3</div>
-            <div class="stat-label">Plataformas</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="stat-top-platform">—</div>
-            <div class="stat-label">Plataforma top</div>
+      <!-- 3. FORMATO + AÇÕES -->
+      <div class="section">
+        <div class="section-title">3. Formato e ações</div>
+        <div class="field">
+          <label>📐 Formato do card</label>
+          <div class="seg" id="fmtSeg">
+            <button data-fmt="square" class="active">⬛ Quadrado (feed)</button>
+            <button data-fmt="story">📱 Stories 9:16</button>
           </div>
         </div>
+        <div class="btn-actions">
+          <button id="copyCardBtn" class="btn-sm">📤 Copiar texto</button>
+          <button id="copyUrlBtn" class="btn-sm" style="background:#edf4ff;color:var(--primary);border-color:rgba(15,93,168,.18)">📋 Copiar link</button>
+        </div>
+        <button id="waBtn" class="btn-sm" style="background:#128c7e;color:#fff;border-color:#128c7e">🟢 Enviar para o WhatsApp</button>
+        <button id="exportBtn" class="btn-sm" style="background:#111827;color:#fff;border-color:#111827">🖼️ Baixar card como JPG</button>
+        <button id="shareBtn" class="btn-sm" style="background:#6d28d9;color:#fff;border-color:#6d28d9">📤 Compartilhar card</button>
       </div>
     </div>
 
-    <!-- ===== PAGE: PRODUTOS ===== -->
-    <div id="page-produtos" class="page">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
-        <div>
-          <h2 style="font-family:'Poppins',sans-serif;font-size:1.3rem">📦 Meus Produtos</h2>
-          <p style="color:var(--muted);font-size:.875rem;margin-top:2px"><span id="product-count">0</span> produto(s) salvo(s)</p>
+    <!-- PREVIEW -->
+    <div class="preview-panel">
+      <div class="card-preview fmt-square" id="cardPreview">
+        <div class="card-topbar">
+          <div class="brand-chip"><span class="dot"></span><span id="cardBrand">Afilias</span></div>
+          <span id="storeBadge" style="font-size:.82rem;font-weight:900;color:var(--muted)"></span>
         </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn btn-outline btn-sm" onclick="exportProducts()">⬇️ Exportar</button>
-          <label class="btn btn-outline btn-sm" style="cursor:pointer">
-            ⬆️ Importar
-            <input type="file" accept=".json" style="display:none" onchange="importProducts(this)">
-          </label>
-          <button class="btn btn-primary btn-sm" onclick="showPage('converter')">+ Adicionar</button>
-        </div>
-      </div>
-
-      <div class="products-grid" id="products-grid"></div>
-    </div>
-
-    <!-- ===== PAGE: CATÁLOGO ===== -->
-    <div id="page-catalogo" class="page">
-      <h2 style="font-family:'Poppins',sans-serif;font-size:1.3rem;margin-bottom:16px">🏪 Meu Catálogo</h2>
-
-      <div class="share-box">
-        <h3>🔗 Compartilhe seu catálogo</h3>
-        <p>Envie este link para seus seguidores verem todas as suas promoções</p>
-        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-          <code id="catalog-url" style="background:#EDE9FE;color:#4C1D95;padding:8px 14px;border-radius:8px;font-size:.82rem;word-break:break-all"></code>
-          <button class="btn btn-primary btn-sm" onclick="copyText(document.getElementById('catalog-url').textContent)">📋 Copiar</button>
-          <a id="catalog-open-btn" href="catalogo.html" target="_blank" class="btn btn-outline btn-sm">🔗 Abrir</a>
-        </div>
-      </div>
-
-      <div id="catalog-preview"></div>
-    </div>
-
-    <!-- ===== PAGE: CONFIGURAÇÕES ===== -->
-    <div id="page-config" class="page">
-      <h2 style="font-family:'Poppins',sans-serif;font-size:1.3rem;margin-bottom:20px">⚙️ Configurações</h2>
-
-      <!-- Afiliados -->
-      <div class="settings-section">
-        <h3>IDs de Afiliado</h3>
-
-        <div class="platform-config">
-          <div class="platform-icon">🛒</div>
-          <div class="platform-info">
-            <label>Amazon Associates — Tag ID</label>
-            <input type="text" id="cfg-amazon-tag" placeholder="Ex: seunome-20">
-            <p class="help-text">
-              Encontre em <strong>affiliate-program.amazon.com.br</strong> → Ferramentas → Tag de rastreamento.<br>
-              O sistema adiciona automaticamente <code>?tag=SUA_TAG</code> em todos os links Amazon.
-            </p>
+        <div class="card-img" id="cardImgWrap"><div class="no-img">Sem imagem</div></div>
+        <div class="card-body">
+          <div id="cardHeadline" class="card-headline">ACHADO DO DIA</div>
+          <div id="cardTitle" class="card-title">Título do produto</div>
+          <div id="cardOff" class="card-off" style="display:none"></div>
+          <div class="card-prices">
+            <div id="cardOld" class="card-old" style="display:none"></div>
+            <div id="cardNew" class="card-new" style="display:none"></div>
           </div>
-        </div>
-
-        <div class="platform-config">
-          <div class="platform-icon">🟠</div>
-          <div class="platform-info">
-            <label>Shopee Affiliates — Link de afiliado gerado</label>
-            <input type="url" id="cfg-shopee-link" placeholder="Ex: https://s.shopee.com.br/XXXXX">
-            <p class="help-text">
-              Gere seu link no painel da Shopee em <strong>affiliate.shopee.com.br</strong> e cole aqui.
-              Quando você converter um link Shopee, este será o link de afiliado usado.
-            </p>
-          </div>
-        </div>
-
-        <div class="platform-config">
-          <div class="platform-icon">🤖</div>
-          <div class="platform-info">
-            <label>Google Gemini — Chave API (para textos com IA)</label>
-            <input type="password" id="cfg-gemini-key" placeholder="AIza...">
-            <p class="help-text">Grátis em <strong>aistudio.google.com</strong> → "Get API Key". Ativa o botão "✨ Gerar com IA".</p>
-          </div>
-        </div>
-
-        <div class="platform-config">
-          <div class="platform-icon">🛍️</div>
-          <div class="platform-info">
-            <label>Mercado Livre — Link de afiliado</label>
-            <input type="url" id="cfg-ml-link" placeholder="Ex: https://click.mercadolivre.com.br/...">
-            <p class="help-text">
-              Acesse o programa de afiliados do Mercado Livre e gere seu link de rastreamento.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Loja -->
-      <div class="settings-section">
-        <h3>Informações da Loja</h3>
-        <div class="form-group">
-          <label>Nome da loja / canal</label>
-          <input type="text" id="cfg-store-name" placeholder="Ex: Ofertas do João">
-        </div>
-        <div class="form-group">
-          <label>Descrição</label>
-          <textarea id="cfg-store-desc" placeholder="Ex: As melhores promoções do dia para você!"></textarea>
-        </div>
-      </div>
-
-      <button class="btn btn-primary btn-lg" onclick="saveSettings()">💾 Salvar Configurações</button>
-
-      <!-- Backup -->
-      <div class="settings-section" style="margin-top:28px">
-        <h3>Backup & Dados</h3>
-        <div class="alert alert-info">
-          <span>ℹ️</span>
-          <div>Seus dados ficam salvos no navegador. Use a exportação para fazer backup ou migrar para outro dispositivo.</div>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-outline" onclick="exportProducts()">⬇️ Exportar Backup</button>
-          <label class="btn btn-outline" style="cursor:pointer">
-            ⬆️ Importar Backup
-            <input type="file" accept=".json" style="display:none" onchange="importProducts(this)">
-          </label>
-          <button class="btn btn-danger" onclick="if(confirm('Apagar TODOS os produtos?')){state.products=[];saveToStorage();showFeedback('🗑️ Dados apagados.');}">🗑️ Limpar Dados</button>
+          <div id="cardSave" class="card-save" style="display:none"></div>
+          <div class="card-cta">🛒 Link de compra:</div>
+          <div id="cardLink" style="font-size:.88rem;color:var(--primary);word-break:break-all">—</div>
+          <div id="cardNote" class="card-note" style="display:none"></div>
         </div>
       </div>
     </div>
+  </div>
+</div>
 
-  </main>
+<!-- MODAL CONFIGURAÇÕES -->
+<div class="modal-bg" id="settingsModal">
+  <div class="modal">
+    <button class="modal-close" id="closeSettings">×</button>
+    <h2>⚙️ Configurações</h2>
+    <p class="msub">Salvo no servidor — funciona em qualquer dispositivo.</p>
 
-  <!-- Toast feedback -->
-  <div id="copy-feedback" class="copy-feedback"></div>
+    <div class="field">
+      <label>🏪 Nome da marca (aparece no card)</label>
+      <input id="cfgStore" type="text" placeholder="Afilias">
+    </div>
+    <div class="field">
+      <label>🟢 Número do WhatsApp (com DDI)</label>
+      <input id="cfgWhats" type="text" placeholder="5513991386968" inputmode="numeric">
+    </div>
 
-  <script src="js/affiliate.js"></script>
-  <script src="js/app.js"></script>
+    <div class="section-title" style="margin:18px 0 12px">IDs de afiliado</div>
+    <div class="field">
+      <label>🛒 Amazon — Tag de associado</label>
+      <input id="cfgAmazon" type="text" placeholder="seunome-20">
+    </div>
+    <div class="field">
+      <label>🟠 Shopee — Link base de afiliado (opcional)</label>
+      <input id="cfgShopee" type="url" placeholder="https://s.shopee.com.br/...">
+    </div>
+    <div class="field">
+      <label>🛍️ Mercado Livre — Link de afiliado (opcional)</label>
+      <input id="cfgMl" type="url" placeholder="https://mercadolivre.com/sec/...">
+    </div>
+
+    <div class="section-title" style="margin:18px 0 12px">
+      Inteligência Artificial
+      <span id="keyBadge" class="badge-key badge-off">sem chave</span>
+    </div>
+    <div class="field">
+      <label>🤖 Google Gemini — Chave da API</label>
+      <input id="cfgGemini" type="password" placeholder="Cole aqui (fica oculta no servidor)">
+      <div class="hint">Grátis em <strong>aistudio.google.com</strong> → "Get API Key". Por segurança, a chave nunca é exibida de volta.</div>
+    </div>
+
+    <button id="saveSettings" class="btn btn-primary" style="margin-top:8px">💾 Salvar configurações</button>
+    <div id="cfgStatus" class="status" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const els={
+  link:$('linkInput'),btn:$('extractBtn'),status:$('status'),
+  title:$('fTitle'),headline:$('fHeadline'),old:$('fOld'),
+  newp:$('fNew'),disc:$('fDisc'),desc:$('fDesc'),img:$('fImg'),
+  storeBadge:$('storeBadge'),affBox:$('affBox'),affUrl:$('affUrl'),
+  aiBtn:$('aiBtn'),aiAlts:$('aiAlts'),
+  cardBrand:$('cardBrand'),cardHeadline:$('cardHeadline'),cardTitle:$('cardTitle'),
+  cardOff:$('cardOff'),cardOld:$('cardOld'),cardNew:$('cardNew'),cardSave:$('cardSave'),
+  cardLink:$('cardLink'),cardNote:$('cardNote'),cardImgWrap:$('cardImgWrap')
+};
+
+let CONFIG={whatsapp:'',amazonTag:'',shopeeBase:'',mlBase:'',storeName:'Afilias',hasGeminiKey:false};
+let affiliateUrl='';
+
+// ─── CONFIG ──────────────────────────────────────────────────────
+async function loadConfig(){
+  try{
+    const r=await fetch('api/config.php');
+    CONFIG=await r.json();
+  }catch{}
+  applyConfig();
+}
+function applyConfig(){
+  const name=CONFIG.storeName||'Afilias';
+  $('brandName').textContent=name;
+  els.cardBrand.textContent=name;
+  updatePreview();
+}
+function fillSettingsForm(){
+  $('cfgStore').value=CONFIG.storeName||'';
+  $('cfgWhats').value=CONFIG.whatsapp||'';
+  $('cfgAmazon').value=CONFIG.amazonTag||'';
+  $('cfgShopee').value=CONFIG.shopeeBase||'';
+  $('cfgMl').value=CONFIG.mlBase||'';
+  $('cfgGemini').value='';
+  const badge=$('keyBadge');
+  badge.textContent=CONFIG.hasGeminiKey?'chave salva ✓':'sem chave';
+  badge.className='badge-key '+(CONFIG.hasGeminiKey?'badge-on':'badge-off');
+}
+$('openSettings').addEventListener('click',()=>{fillSettingsForm();$('settingsModal').classList.add('show');});
+$('closeSettings').addEventListener('click',()=>$('settingsModal').classList.remove('show'));
+$('settingsModal').addEventListener('click',e=>{if(e.target===$('settingsModal'))$('settingsModal').classList.remove('show');});
+$('saveSettings').addEventListener('click',async()=>{
+  const payload={
+    storeName:$('cfgStore').value.trim(),
+    whatsapp:$('cfgWhats').value.trim(),
+    amazonTag:$('cfgAmazon').value.trim(),
+    shopeeBase:$('cfgShopee').value.trim(),
+    mlBase:$('cfgMl').value.trim(),
+  };
+  const key=$('cfgGemini').value.trim();
+  if(key)payload.geminiKey=key;
+  $('cfgStatus').textContent='Salvando…';$('cfgStatus').className='status warn';
+  try{
+    const r=await fetch('api/config.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    CONFIG=await r.json();
+    applyConfig();
+    $('cfgStatus').textContent='✅ Salvo!';$('cfgStatus').className='status ok';
+    updateAffiliate();
+    setTimeout(()=>$('settingsModal').classList.remove('show'),800);
+  }catch{
+    $('cfgStatus').textContent='❌ Erro ao salvar (precisa estar hospedado com PHP).';$('cfgStatus').className='status err';
+  }
+});
+
+// ─── IMAGEM via proxy (sem CORS) ─────────────────────────────────
+let currentImgB64=null,lastImgUrl='';
+async function loadImageToCanvas(url){
+  if(!url)return null;
+  const proxies=[
+    'https://images.weserv.nl/?url='+encodeURIComponent(url)+'&w=900&h=900&fit=cover&output=jpg',
+    'https://corsproxy.io/?'+encodeURIComponent(url),
+    url
+  ];
+  let objectUrl=null;
+  for(const src of proxies){
+    try{const res=await fetch(src);if(!res.ok)continue;const blob=await res.blob();objectUrl=URL.createObjectURL(blob);break;}catch{continue;}
+  }
+  if(!objectUrl)return null;
+  return new Promise(resolve=>{
+    const img=new Image();
+    img.onload=()=>{
+      const c=document.createElement('canvas'),size=900;
+      c.width=size;c.height=size;
+      const ctx=c.getContext('2d'),ratio=img.naturalWidth/img.naturalHeight;
+      let sx=0,sy=0,sw=img.naturalWidth,sh=img.naturalHeight;
+      if(ratio>1){sx=(sw-sh)/2;sw=sh;}else{sy=(sh-sw)/2;sh=sw;}
+      ctx.drawImage(img,sx,sy,sw,sh,0,0,size,size);
+      URL.revokeObjectURL(objectUrl);
+      try{const b64=c.toDataURL('image/jpeg',0.95);currentImgB64=b64;resolve(b64);}catch{resolve(null);}
+    };
+    img.onerror=()=>{URL.revokeObjectURL(objectUrl);resolve(null);};
+    img.src=objectUrl;
+  });
+}
+async function renderCardImage(url){
+  els.cardImgWrap.innerHTML='<div class="no-img">⏳ Carregando…</div>';
+  if(!url){els.cardImgWrap.innerHTML='<div class="no-img">Sem imagem</div>';return;}
+  const b64=await loadImageToCanvas(url);
+  if(b64){const img=document.createElement('img');img.src=b64;img.alt='Produto';els.cardImgWrap.innerHTML='';els.cardImgWrap.appendChild(img);}
+  else els.cardImgWrap.innerHTML='<div class="no-img">Imagem não carregou</div>';
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────
+function setStatus(m,c='warn'){els.status.textContent=m;els.status.className='status '+c}
+function detectStore(url){try{const h=new URL(url).hostname.replace(/^www\./,'');if(h.includes('shopee'))return'Shopee';if(h.includes('mercadolivre')||h.includes('mercadolibre'))return'Mercado Livre';if(h.includes('amazon'))return'Amazon';if(h.includes('aliexpress'))return'AliExpress';return h}catch{return'—'}}
+function parsePrice(v){if(!v)return null;const s=String(v).trim().replace(/[^0-9,.-]/g,'');if(!s)return null;if(s.includes(',')&&s.includes('.'))return Number(s.replace(/\./g,'').replace(',','.'));if(s.includes(','))return Number(s.replace(',','.'));return Number(s)}
+function fmt(v){return v==null||isNaN(v)?null:new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v)}
+
+// ─── CONVERSÃO DE AFILIADO ───────────────────────────────────────
+function convertAffiliate(url){
+  if(!url)return '';
+  const store=detectStore(url);
+  try{
+    if(store==='Amazon'&&CONFIG.amazonTag){
+      const u=new URL(url);
+      ['ref','ref_','linkCode','linkId','pf_rd_r','pf_rd_i','pd_rd_r','pd_rd_w'].forEach(p=>u.searchParams.delete(p));
+      u.searchParams.set('tag',CONFIG.amazonTag);
+      return u.toString();
+    }
+    if(store==='Shopee'&&CONFIG.shopeeBase) return CONFIG.shopeeBase;
+    if(store==='Mercado Livre'&&CONFIG.mlBase) return CONFIG.mlBase;
+  }catch{}
+  return url;
+}
+function updateAffiliate(){
+  const url=els.link.value.trim();
+  affiliateUrl=convertAffiliate(url);
+  if(url&&affiliateUrl&&affiliateUrl!==url){
+    els.affBox.classList.add('show');
+    els.affUrl.textContent=affiliateUrl;
+  }else{
+    els.affBox.classList.remove('show');
+  }
+  els.cardLink.textContent=affiliateUrl||url||'—';
+}
+
+// ─── PREVIEW ─────────────────────────────────────────────────────
+function updatePreview(){
+  const url=els.link.value.trim();
+  const store=detectStore(url);
+  els.storeBadge.textContent=store&&store!=='—'?'🏪 '+store:'';
+  els.cardHeadline.textContent=els.headline.value.trim()||'ACHADO DO DIA';
+  els.cardTitle.textContent=els.title.value.trim()||'Título do produto';
+  const oldV=parsePrice(els.old.value),newV=parsePrice(els.newp.value);
+  let discV=parsePrice(els.disc.value),saveV=null;
+  if(oldV!=null&&newV!=null&&oldV>newV){saveV=oldV-newV;if(!els.disc.value.trim())discV=Math.round((saveV/oldV)*100);}
+  els.cardOld.style.display=oldV!=null?'':'none';if(oldV!=null)els.cardOld.textContent='💸 Antes: '+fmt(oldV);
+  els.cardNew.style.display=newV!=null?'':'none';if(newV!=null)els.cardNew.textContent='🔥 '+fmt(newV);
+  els.cardOff.style.display=discV!=null?'':'none';if(discV!=null)els.cardOff.textContent='🏷️ '+Math.round(discV)+'% OFF';
+  els.cardSave.style.display=saveV!=null?'':'none';if(saveV!=null)els.cardSave.textContent='🎟️ Você economiza '+fmt(saveV);
+  updateAffiliate();
+  const desc=els.desc.value.trim();
+  els.cardNote.style.display=desc?'':'none';if(desc)els.cardNote.textContent='📝 '+desc;
+  const imgUrl=els.img.value.trim();
+  if(imgUrl!==lastImgUrl){lastImgUrl=imgUrl;renderCardImage(imgUrl);}
+}
+function autoCalcDisc(){
+  const oldV=parsePrice(els.old.value),newV=parsePrice(els.newp.value);
+  if(oldV!=null&&newV!=null&&oldV>newV){els.disc.value=Math.round(((oldV-newV)/oldV)*100)+'%';}
+  updatePreview();
+}
+els.old.addEventListener('input',autoCalcDisc);
+els.newp.addEventListener('input',autoCalcDisc);
+['title','headline','disc','desc','img','link'].forEach(k=>els[k].addEventListener('input',updatePreview));
+
+// ─── FORMATO ─────────────────────────────────────────────────────
+$('fmtSeg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  [...$('fmtSeg').children].forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  const card=$('cardPreview');
+  card.classList.toggle('fmt-square',b.dataset.fmt==='square');
+  card.classList.toggle('fmt-story',b.dataset.fmt==='story');
+});
+
+// ─── EXTRACT (servidor PHP) ──────────────────────────────────────
+async function extract(){
+  const url=els.link.value.trim();
+  if(!url){setStatus('Cole um link antes.','err');return}
+  try{new URL(url)}catch{setStatus('Link inválido.','err');return}
+  els.btn.disabled=true;setStatus('Buscando…','warn');
+  try{
+    let d={};
+    try{const r=await fetch('api/extract.php?url='+encodeURIComponent(url));d=await r.json();}catch{}
+    // fallback para APIs públicas se o PHP não retornou
+    if(!d.image&&!d.title){
+      const ml=await fetch('https://api.microlink.io/?url='+encodeURIComponent(url)).then(r=>r.json()).catch(()=>null);
+      if(ml?.data){d.image=ml.data.image?.url||'';d.title=ml.data.title||'';}
+    }
+    if(d.title){els.title.value||(els.title.value=d.title);}
+    if(d.image){els.img.value=d.image;}
+    if(d.price&&!els.newp.value.trim()){els.newp.value=d.price;}
+    autoCalcDisc();updatePreview();
+    if(d.image||d.title)setStatus('✅ Dados extraídos!','ok');
+    else setStatus('Não encontrei dados. Preencha manualmente.','warn');
+  }catch(e){setStatus('Erro: '+e.message,'err')}
+  finally{els.btn.disabled=false}
+}
+$('extractBtn').addEventListener('click',extract);
+els.link.addEventListener('keydown',e=>{if(e.key==='Enter')extract();});
+
+// ─── IA: CHAMADA CRIATIVA ────────────────────────────────────────
+els.aiBtn.addEventListener('click',async()=>{
+  const title=els.title.value.trim();
+  if(!title){setStatus('Preencha o título antes de usar a IA.','err');return;}
+  if(!CONFIG.hasGeminiKey){
+    alert('Configure sua chave do Gemini em ⚙️ Configurações.\n\nÉ grátis em aistudio.google.com → "Get API Key".');
+    fillSettingsForm();$('settingsModal').classList.add('show');return;
+  }
+  const orig=els.aiBtn.textContent;
+  els.aiBtn.textContent='⏳ Criando…';els.aiBtn.disabled=true;
+  try{
+    const r=await fetch('api/generate.php',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({title,store:detectStore(els.link.value.trim()),old:els.old.value.trim(),new:els.newp.value.trim()})});
+    const d=await r.json();
+    if(d.error){alert('IA: '+d.error);return;}
+    if(d.headline){els.headline.value=d.headline;}
+    if(d.descricao&&!els.desc.value.trim()){els.desc.value=d.descricao;}
+    // alternativas clicáveis
+    els.aiAlts.innerHTML='';
+    const alts=[d.headline,...(d.alternativas||[])].filter(Boolean);
+    if(alts.length>1){
+      alts.forEach(a=>{const b=document.createElement('button');b.className='ai-alt';b.textContent='✨ '+a;b.onclick=()=>{els.headline.value=a;updatePreview();};els.aiAlts.appendChild(b);});
+      els.aiAlts.classList.add('show');
+    }
+    updatePreview();
+  }catch(e){alert('Erro ao chamar a IA. Verifique a hospedagem e a conexão.');}
+  finally{els.aiBtn.textContent=orig;els.aiBtn.disabled=false;}
+});
+
+// ─── TEXTO / WHATSAPP ────────────────────────────────────────────
+function buildCardText(){
+  const url=affiliateUrl||els.link.value.trim();
+  const store=detectStore(els.link.value.trim());
+  const oldV=parsePrice(els.old.value),newV=parsePrice(els.newp.value),discV=parsePrice(els.disc.value);
+  const saveV=(oldV&&newV&&oldV>newV)?oldV-newV:null;
+  const lines=[els.headline.value.trim()||'ACHADO DO DIA','','🏷️ '+(els.title.value.trim()||'Produto')];
+  if(oldV||newV||discV){lines.push('');if(oldV)lines.push('💸 Antes: '+fmt(oldV));if(newV)lines.push('🔥 Agora: '+fmt(newV));if(discV)lines.push('🏷️ '+Math.round(discV)+'% OFF');if(saveV)lines.push('🎟️ Economize: '+fmt(saveV));}
+  if(els.desc.value.trim()){lines.push('');lines.push('📝 '+els.desc.value.trim());}
+  if(url){lines.push('');if(store&&store!=='—')lines.push('⭐ Oferta | '+store);lines.push('🛒 '+url);}
+  return lines.join('\n');
+}
+$('copyCardBtn').addEventListener('click',async()=>{await navigator.clipboard.writeText(buildCardText());flash('copyCardBtn','✅ Texto copiado!','📤 Copiar texto');});
+$('copyUrlBtn').addEventListener('click',async()=>{const u=affiliateUrl||els.link.value.trim();if(!u)return;await navigator.clipboard.writeText(u);flash('copyUrlBtn','✅ Copiado!','📋 Copiar link');});
+$('waBtn').addEventListener('click',()=>{
+  const num=(CONFIG.whatsapp||'').replace(/\D/g,'');
+  const base=num?'https://wa.me/'+num+'?text=':'https://wa.me/?text=';
+  window.open(base+encodeURIComponent(buildCardText()),'_blank','noopener,noreferrer');
+});
+function flash(id,msg,orig){const b=$(id);const o=b.textContent;b.textContent=msg;setTimeout(()=>b.textContent=orig||o,2000);}
+
+// ─── EXPORTAR / COMPARTILHAR CARD ────────────────────────────────
+async function generateCardJpeg(){
+  const node=$('cardPreview');
+  const opts={quality:0.97,pixelRatio:3,backgroundColor:'#ffffff'};
+  await htmlToImage.toJpeg(node,opts).catch(()=>{});
+  await htmlToImage.toJpeg(node,opts).catch(()=>{});
+  return await htmlToImage.toJpeg(node,opts);
+}
+$('exportBtn').addEventListener('click',async()=>{
+  const b=$('exportBtn');b.textContent='⏳ Gerando…';b.disabled=true;
+  try{const d=await generateCardJpeg();const a=document.createElement('a');a.href=d;a.download='oferta.jpg';a.click();b.textContent='✅ Baixado!';}
+  catch(e){b.textContent='❌ Erro';}
+  finally{setTimeout(()=>{b.textContent='🖼️ Baixar card como JPG';b.disabled=false;},2200);}
+});
+$('shareBtn').addEventListener('click',async()=>{
+  const b=$('shareBtn');b.textContent='⏳ Preparando…';b.disabled=true;
+  try{
+    const d=await generateCardJpeg();const res=await fetch(d);const blob=await res.blob();
+    const file=new File([blob],'oferta.jpg',{type:'image/jpeg'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:els.title.value.trim()||'Oferta',text:buildCardText()});
+      b.textContent='✅ Compartilhado!';
+    }else{const a=document.createElement('a');a.href=d;a.download='oferta.jpg';a.click();b.textContent='⬇️ Baixado';}
+  }catch(e){if(e.name!=='AbortError')b.textContent='❌ Erro';}
+  finally{setTimeout(()=>{b.textContent='📤 Compartilhar card';b.disabled=false;},2500);}
+});
+
+// ─── INIT ────────────────────────────────────────────────────────
+loadConfig();
+updatePreview();
+</script>
 </body>
 </html>

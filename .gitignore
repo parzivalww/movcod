@@ -1,4 +1,6 @@
-data/products.json
-data/settings.json
+# Dados locais — NUNCA versionar (contém a chave da IA)
+data/config.json
+data/*.json
+
 sf_current/
 *.zip

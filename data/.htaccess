@@ -1,0 +1,3 @@
+# Bloqueia todo acesso direto à pasta de dados
+Order allow,deny
+Deny from all
